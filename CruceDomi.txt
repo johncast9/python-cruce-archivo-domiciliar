@@ -1,0 +1,70 @@
+import pandas as pd
+
+# ==============================
+# CONFIGURACIÓN
+# ==============================
+INPUT_FILE_1 = r"C:\Ruta\BaseAyR.xlsx"
+INPUT_FILE_2 = r"C:\Ruta\BaseNegocios.xlsx"
+OUTPUT_FILE = r"C:\Ruta\CruceResultado.xlsx"
+
+# ==============================
+# FUNCIONES
+# ==============================
+def cargar_datos(ruta):
+    return pd.read_excel(ruta)
+
+
+def filtrar_default(df, columna):
+    return df[df[columna] != "DEFAULT"]
+
+
+def realizar_cruce(df1, df2):
+    return pd.merge(
+        df1,
+        df2,
+        left_on=["Clave Negocio", "Agente Id", "Nombre Agente"],
+        right_on=["clave", "agenteid", "NombreAgente"],
+        how="left"
+    )
+
+
+def limpiar_resultado(df):
+    return df[df["clave"].notna()]
+
+
+def guardar_resultado(df, ruta):
+    df.to_excel(ruta, index=False)
+
+
+# ==============================
+# PROCESO PRINCIPAL
+# ==============================
+def ejecutar_proceso():
+
+    print("Iniciando proceso...")
+
+    # Cargar archivos
+    base_1 = cargar_datos(INPUT_FILE_1)
+    base_2 = cargar_datos(INPUT_FILE_2)
+
+    # Filtrar datos
+    base_1 = filtrar_default(base_1, "Clave Negocio")
+    base_2 = filtrar_default(base_2, "clave")
+
+    # Cruce
+    resultado = realizar_cruce(base_1, base_2)
+
+    # Limpieza
+    resultado_final = limpiar_resultado(resultado)
+
+    # Guardar
+    guardar_resultado(resultado_final, OUTPUT_FILE)
+
+    print("Proceso completado.")
+
+
+# ==============================
+# EJECUCIÓN
+# ==============================
+if __name__ == "__main__":
+    ejecutar_proceso()
